@@ -1,0 +1,6 @@
+artifact_location: file:///home/mateo/ml-projects/mlops-course/project/mlruns/942567970910714432
+creation_time: 1751861760192
+experiment_id: '942567970910714432'
+last_update_time: 1751861760192
+lifecycle_stage: active
+name: credit_default_lr

@@ -1,0 +1,9 @@
+__pycache__/
+*.pyc
+*.pkl
+*.db
+*.zip
+*.tar.gz
+.ipynb_checkpoints/
+mlartifacts/
+postgres_data/

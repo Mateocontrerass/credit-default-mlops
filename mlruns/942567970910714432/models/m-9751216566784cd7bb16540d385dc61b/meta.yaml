@@ -1,0 +1,10 @@
+artifact_location: file:///home/mateo/ml-projects/mlops-course/project/mlruns/942567970910714432/models/m-9751216566784cd7bb16540d385dc61b/artifacts
+creation_timestamp: 1751861809346
+experiment_id: '942567970910714432'
+last_updated_timestamp: 1751861825986
+model_id: m-9751216566784cd7bb16540d385dc61b
+model_type: null
+name: model
+source_run_id: c77733965cb84c8e9596f56c3d7760c5
+status: 2
+status_message: null

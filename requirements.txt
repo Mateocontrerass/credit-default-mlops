@@ -1,0 +1,5 @@
+polars
+scikit-learn
+mlflow
+fastapi
+gradio

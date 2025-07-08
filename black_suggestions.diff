@@ -1,0 +1,420 @@
+--- /home/mateo/ml-projects/mlops-course/project/app/load_model.py	2025-07-06 22:10:41.335391+00:00
++++ /home/mateo/ml-projects/mlops-course/project/app/load_model.py	2025-07-08 00:18:19.803899+00:00
+@@ -1,8 +1,8 @@
++import pickle
+ 
+-import pickle 
+ 
+-def load_model(path = "models/model_lr.pkl"):
+-    with open(path,"rb") as f:
++def load_model(path="models/model_lr.pkl"):
++    with open(path, "rb") as f:
+         model = pickle.load(f)
+ 
+-    return model
+\ No newline at end of file
++    return model
+--- /home/mateo/ml-projects/mlops-course/project/app/model.py	2025-07-06 22:11:36.054835+00:00
++++ /home/mateo/ml-projects/mlops-course/project/app/model.py	2025-07-08 00:18:19.812463+00:00
+@@ -1,18 +1,20 @@
++from pydantic import BaseModel, Field
+ 
+-from pydantic import BaseModel, Field
+ 
+ class InputFeatures(BaseModel):
+     RevolvingUtilizationOfUnsecuredLines: float
+     age: int
+-    NumberOfTime30_59DaysPastDueNotWorse: int = Field(alias="NumberOfTime30-59DaysPastDueNotWorse")
++    NumberOfTime30_59DaysPastDueNotWorse: int = Field(
++        alias="NumberOfTime30-59DaysPastDueNotWorse"
++    )
+     DebtRatio: float
+     MonthlyIncome: float
+     NumberOfOpenCreditLinesAndLoans: int
+     NumberOfTimes90DaysLate: int
+     NumberRealEstateLoansOrLines: int
+-    NumberOfTime60_89DaysPastDueNotWorse: int = Field(alias="NumberOfTime60-89DaysPastDueNotWorse")
++    NumberOfTime60_89DaysPastDueNotWorse: int = Field(
++        alias="NumberOfTime60-89DaysPastDueNotWorse"
++    )
+     NumberOfDependents: int
+ 
+-    model_config = {
+-        "populate_by_name": True
+-    }
++    model_config = {"populate_by_name": True}
+--- /home/mateo/ml-projects/mlops-course/project/app/predict.py	2025-07-06 23:58:28.497436+00:00
++++ /home/mateo/ml-projects/mlops-course/project/app/predict.py	2025-07-08 00:18:19.816801+00:00
+@@ -1,35 +1,39 @@
+-
+ import numpy as np
+ from app.load_model import load_model
+ from app.model import InputFeatures
+ 
+ model = load_model()
+ 
++
+ def make_prediction(features: InputFeatures) -> float:
+     """
+     Make a prediction using the loaded model and input features.
+-    
++
+     Args:
+         features (InputFeatures): Input features for the prediction.
+-        
++
+     Returns:
+         float: Predicted probability of credit default.
+     """
+     # Convert input features to a numpy array
+-    input_data = np.array([[
+-        features.RevolvingUtilizationOfUnsecuredLines,
+-        features.age,
+-        features.NumberOfTime30_59DaysPastDueNotWorse,
+-        features.DebtRatio,
+-        features.MonthlyIncome,
+-        features.NumberOfOpenCreditLinesAndLoans,
+-        features.NumberOfTimes90DaysLate,
+-        features.NumberRealEstateLoansOrLines,
+-        features.NumberOfTime60_89DaysPastDueNotWorse,
+-        features.NumberOfDependents
+-    ]])
+-    
++    input_data = np.array(
++        [
++            [
++                features.RevolvingUtilizationOfUnsecuredLines,
++                features.age,
++                features.NumberOfTime30_59DaysPastDueNotWorse,
++                features.DebtRatio,
++                features.MonthlyIncome,
++                features.NumberOfOpenCreditLinesAndLoans,
++                features.NumberOfTimes90DaysLate,
++                features.NumberRealEstateLoansOrLines,
++                features.NumberOfTime60_89DaysPastDueNotWorse,
++                features.NumberOfDependents,
++            ]
++        ]
++    )
++
+     # Make prediction
+     prediction = model.predict_proba(input_data)[:, 1]
+-    
+-    return float(prediction[0])  # Return the probability of default as a float
+\ No newline at end of file
++
++    return float(prediction[0])  # Return the probability of default as a float
+--- /home/mateo/ml-projects/mlops-course/project/test/test_docker_predict.py	2025-07-07 23:52:22.019553+00:00
++++ /home/mateo/ml-projects/mlops-course/project/test/test_docker_predict.py	2025-07-08 00:18:19.820408+00:00
+@@ -1,7 +1,7 @@
++import requests
+ 
+-import requests
+ 
+ def test_predict_endpoint_running():
+     url = "http://localhost:8000/predict"
+     payload = {
+         "RevolvingUtilizationOfUnsecuredLines": 0.5,
+@@ -11,20 +11,19 @@
+         "MonthlyIncome": 5000,
+         "NumberOfOpenCreditLinesAndLoans": 5,
+         "NumberOfTimes90DaysLate": 0,
+         "NumberRealEstateLoansOrLines": 1,
+         "NumberOfTime60-89DaysPastDueNotWorse": 0,
+-        "NumberOfDependents": 2
++        "NumberOfDependents": 2,
+     }
+ 
+     response = requests.post(url, json=payload)
+ 
+     assert response.status_code == 200
+     json_data = response.json()
+     assert "prediction" in json_data
+     assert 0 <= json_data["prediction"] <= 1
+-
+ 
+ 
+ # curl -X POST http://127.0.0.1:8001/predict   -H "Content-Type: application/json"   -d '{
+ #     "RevolvingUtilizationOfUnsecuredLines": 0.5,
+ #     "age": 45,
+@@ -34,6 +33,6 @@
+ #     "NumberOfOpenCreditLinesAndLoans": 6,
+ #     "NumberOfTimes90DaysLate": 0,
+ #     "NumberRealEstateLoansOrLines": 1,
+ #     "NumberOfTime60-89DaysPastDueNotWorse": 0,
+ #     "NumberOfDependents": 2
+-#   }'
+\ No newline at end of file
++#   }'
+--- /home/mateo/ml-projects/mlops-course/project/src/configs.py	2025-07-04 23:11:24.936641+00:00
++++ /home/mateo/ml-projects/mlops-course/project/src/configs.py	2025-07-08 00:18:19.828669+00:00
+@@ -1,6 +1,5 @@
+-
+ # config.py
+ 
+ import os
+ 
+ # Base project directory
+@@ -12,6 +11,5 @@
+ TRAIN_FILE = os.path.join(DATA_DIR, "cs-training.csv")
+ TEST_FILE = os.path.join(DATA_DIR, "cs-test.csv")
+ 
+ # Kaggle config dir (if kaggle.json is stored locally in the project)
+ KAGGLE_CONFIG_DIR = PROJECT_ROOT
+-
+--- /home/mateo/ml-projects/mlops-course/project/app/gradio_ui.py	2025-07-07 23:27:46.071238+00:00
++++ /home/mateo/ml-projects/mlops-course/project/app/gradio_ui.py	2025-07-08 00:18:19.852365+00:00
+@@ -1,7 +1,8 @@
+ import gradio as gr
+ import requests
++
+ 
+ # Define the Gradio UI function
+ def gradio_predict(
+     RevolvingUtilizationOfUnsecuredLines: float,
+     age: int,
+@@ -10,11 +11,11 @@
+     MonthlyIncome: float,
+     NumberOfOpenCreditLinesAndLoans: int,
+     NumberOfTimes90DaysLate: int,
+     NumberRealEstateLoansOrLines: int,
+     NumberOfTime60_89DaysPastDueNotWorse: int,
+-    NumberOfDependents: int
++    NumberOfDependents: int,
+ ):
+     # Prepare the input data as a dictionary
+     data = {
+         "RevolvingUtilizationOfUnsecuredLines": RevolvingUtilizationOfUnsecuredLines,
+         "age": age,
+@@ -23,19 +24,20 @@
+         "MonthlyIncome": MonthlyIncome,
+         "NumberOfOpenCreditLinesAndLoans": NumberOfOpenCreditLinesAndLoans,
+         "NumberOfTimes90DaysLate": NumberOfTimes90DaysLate,
+         "NumberRealEstateLoansOrLines": NumberRealEstateLoansOrLines,
+         "NumberOfTime60_89DaysPastDueNotWorse": NumberOfTime60_89DaysPastDueNotWorse,
+-        "NumberOfDependents": NumberOfDependents
++        "NumberOfDependents": NumberOfDependents,
+     }
+-    
++
+     # Send the data to FastAPI endpoint for prediction
+     response = requests.post("http://127.0.0.1:8000/predict", json=data)
+-    
++
+     # Parse the response from FastAPI and return it
+     prediction = response.json()["prediction"]
+     return prediction
++
+ 
+ # Create the Gradio interface using the new API
+ def create_gradio_interface():
+     inputs = [
+         gr.Number(label="Revolving Utilization of Unsecured Lines"),
+@@ -45,13 +47,11 @@
+         gr.Number(label="Monthly Income"),
+         gr.Number(label="Number of Open Credit Lines and Loans"),
+         gr.Number(label="Number of Times 90 Days Late"),
+         gr.Number(label="Number of Real Estate Loans or Lines"),
+         gr.Number(label="Number of Time 60-89 Days Past Due Not Worse"),
+-        gr.Number(label="Number of Dependents")
++        gr.Number(label="Number of Dependents"),
+     ]
+-    
++
+     outputs = gr.Textbox()
+-    
++
+     return gr.Interface(fn=gradio_predict, inputs=inputs, outputs=outputs)
+-
+-
+--- /home/mateo/ml-projects/mlops-course/project/test/test_predict.py	2025-07-07 23:40:28.465130+00:00
++++ /home/mateo/ml-projects/mlops-course/project/test/test_predict.py	2025-07-08 00:18:19.863815+00:00
+@@ -1,15 +1,14 @@
+-
+-
+ import sys
+ import os
+ 
+ # Agrega el directorio padre al sys.path
+ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+ 
+ from app.model import InputFeatures
+ from app.predict import make_prediction
++
+ 
+ def test_make_prediction_valid_input():
+     features = InputFeatures(
+         RevolvingUtilizationOfUnsecuredLines=0.5,
+         age=45,
+@@ -18,9 +17,9 @@
+         MonthlyIncome=5000,
+         NumberOfOpenCreditLinesAndLoans=5,
+         NumberOfTimes90DaysLate=0,
+         NumberRealEstateLoansOrLines=1,
+         NumberOfTime60_89DaysPastDueNotWorse=0,
+-        NumberOfDependents=2
++        NumberOfDependents=2,
+     )
+     prediction = make_prediction(features)
+     assert 0 <= prediction <= 1
+--- /home/mateo/ml-projects/mlops-course/project/app/main.py	2025-07-07 23:27:29.485566+00:00
++++ /home/mateo/ml-projects/mlops-course/project/app/main.py	2025-07-08 00:18:19.920066+00:00
+@@ -22,25 +22,28 @@
+         writer.writeheader()
+ 
+ # === FASTAPI SETUP ===
+ app = FastAPI(title="Credit Default Prediction API")
+ 
++
+ @app.post("/predict")
+ def predict(features: InputFeatures):
+     """
+     Predict the probability of credit default based on input features.
+     """
+     prediction = make_prediction(features)
+ 
+     # Save prediction to CSV
+     with open(CSV_FILE, mode="a", newline="") as f:
+         writer = csv.DictWriter(f, fieldnames=FIELDNAMES)
+-        writer.writerow({
+-            "timestamp": datetime.now().isoformat(),
+-            "input_json": json.dumps(features.dict()),
+-            "prediction": int(prediction)
+-        })
++        writer.writerow(
++            {
++                "timestamp": datetime.now().isoformat(),
++                "input_json": json.dumps(features.dict()),
++                "prediction": int(prediction),
++            }
++        )
+ 
+     return {"prediction": prediction}
+ 
+ 
+ @app.get("/monitor")
+@@ -54,14 +57,13 @@
+             preds = [int(row["prediction"]) for row in reader]
+ 
+         total = len(preds)
+         distribution = dict(Counter(preds))
+ 
+-        return JSONResponse({
+-            "total_predictions": total,
+-            "class_distribution": distribution
+-        })
++        return JSONResponse(
++            {"total_predictions": total, "class_distribution": distribution}
++        )
+ 
+     except Exception as e:
+         return JSONResponse({"error": str(e)}, status_code=500)
+ 
+ 
+@@ -70,14 +72,12 @@
+ def startup():
+     def run_gradio():
+         interface = create_gradio_interface()
+         interface.launch(
+             server_name="0.0.0.0",  # <- necesario para exponer fuera del contenedor
+-            server_port=7860,       # <- para que coincida con tu `-p 7860:7860`
++            server_port=7860,  # <- para que coincida con tu `-p 7860:7860`
+             share=False,
+-            inline=False
++            inline=False,
+         )
+ 
+     thread = Thread(target=run_gradio)
+     thread.start()
+-
+-
+--- /home/mateo/ml-projects/mlops-course/project/src/train_model.py	2025-07-07 04:14:04.152124+00:00
++++ /home/mateo/ml-projects/mlops-course/project/src/train_model.py	2025-07-08 00:18:19.929779+00:00
+@@ -7,58 +7,74 @@
+ from sklearn.metrics import accuracy_score
+ import pickle
+ from prefect import task
+ 
+ 
+-
+ @task
+ def load_data(path):
+     return pl.read_csv(path)
+ 
++
+ @task
+ def preprocess(df):
+-    df = df.with_columns([
+-        pl.when(
+-            pl.col("MonthlyIncome").is_null() | (pl.col("MonthlyIncome") == "NA")
+-        ).then(0).otherwise(pl.col("MonthlyIncome")).cast(pl.Int32).alias("MonthlyIncome"),
+-        pl.when(
+-            pl.col("NumberOfDependents").is_null() | (pl.col("NumberOfDependents") == "NA")
+-        ).then(0).otherwise(pl.col("NumberOfDependents")).cast(pl.Int32).alias("NumberOfDependents"),
+-        pl.col("SeriousDlqin2yrs").fill_null(0).cast(pl.Int32).alias("SeriousDlqin2yrs")
+-
+-    ])
++    df = df.with_columns(
++        [
++            pl.when(
++                pl.col("MonthlyIncome").is_null() | (pl.col("MonthlyIncome") == "NA")
++            )
++            .then(0)
++            .otherwise(pl.col("MonthlyIncome"))
++            .cast(pl.Int32)
++            .alias("MonthlyIncome"),
++            pl.when(
++                pl.col("NumberOfDependents").is_null()
++                | (pl.col("NumberOfDependents") == "NA")
++            )
++            .then(0)
++            .otherwise(pl.col("NumberOfDependents"))
++            .cast(pl.Int32)
++            .alias("NumberOfDependents"),
++            pl.col("SeriousDlqin2yrs")
++            .fill_null(0)
++            .cast(pl.Int32)
++            .alias("SeriousDlqin2yrs"),
++        ]
++    )
+ 
+     df = df.fill_null(0)
+     df = df.select(df.columns[1:])
+     x = df.drop("SeriousDlqin2yrs").to_numpy()
+     y = df["SeriousDlqin2yrs"].to_numpy()
+     return x, y
+ 
++
+ @task
+ def train_model(x, y):
+     model = LogisticRegression(max_iter=1000, random_state=123)
+     model.fit(x, y)
+     return model
+ 
++
+ @task
+ def evaluate_model(model, x, y):
+     y_pred = model.predict(x)
+     accuracy = accuracy_score(y, y_pred)
+ 
++    return accuracy
+ 
+-    return accuracy
+ 
+ @task
+ def save_model(model, path):
+     os.makedirs(os.path.dirname(path), exist_ok=True)
+-    with open(path, 'wb') as f:
++    with open(path, "wb") as f:
+         pickle.dump(model, f)
+ 
+ 
+ from prefect import task
+ import mlflow
+ import mlflow.sklearn
++
+ 
+ @task
+ def run_training(train_path, test_path, model_path):
+     # Configura la URI de seguimiento (puede ser localhost o tu contenedor)
+     mlflow.set_experiment("credit_default_lr")

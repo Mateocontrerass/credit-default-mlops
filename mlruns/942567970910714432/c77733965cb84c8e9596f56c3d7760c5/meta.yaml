@@ -1,0 +1,14 @@
+artifact_uri: file:///home/mateo/ml-projects/mlops-course/project/mlruns/942567970910714432/c77733965cb84c8e9596f56c3d7760c5/artifacts
+end_time: 1751861826000
+entry_point_name: ''
+experiment_id: '942567970910714432'
+lifecycle_stage: active
+run_id: c77733965cb84c8e9596f56c3d7760c5
+run_name: efficient-vole-568
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1751861760414
+status: 3
+tags: []
+user_id: mateo

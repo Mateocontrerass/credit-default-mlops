@@ -1,0 +1,7 @@
+
+# Diff txt
+black --diff app test > black_suggestions.diff
+
+
+# run black
+black src test app
