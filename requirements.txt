@@ -3,3 +3,4 @@ scikit-learn
 mlflow
 fastapi
 gradio
+google-cloud-bigquery

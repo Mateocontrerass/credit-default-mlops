@@ -9,7 +9,7 @@ test:
 
 # Run API container
 run-api:
-	docker build -t credit-api -f Dockerfile.fastapi .
+	docker build -t credit-api -f Dockerfile .
 	docker run -p 8000:8000 -p 7860:7860 credit-api
 
 # Clean up .pyc and __pycache__
@@ -24,3 +24,12 @@ check-format:
 # Run Prefect flow locally
 run-flow:
 	python flow.py
+
+# Deploy to cloud
+deploy:
+	gcloud run deploy credit-predictor \
+		--source . \
+		--region us-central1 \
+		--allow-unauthenticated \
+		--port 8000 \
+		--project credit-default-mlops

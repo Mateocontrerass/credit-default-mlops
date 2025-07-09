@@ -1,5 +1,7 @@
 import gradio as gr
 import requests
+from app.predict import make_prediction
+from app.model import InputFeatures
 
 
 # Define the Gradio UI function
@@ -15,25 +17,20 @@ def gradio_predict(
     NumberOfTime60_89DaysPastDueNotWorse: int,
     NumberOfDependents: int,
 ):
-    # Prepare the input data as a dictionary
-    data = {
-        "RevolvingUtilizationOfUnsecuredLines": RevolvingUtilizationOfUnsecuredLines,
-        "age": age,
-        "NumberOfTime30_59DaysPastDueNotWorse": NumberOfTime30_59DaysPastDueNotWorse,
-        "DebtRatio": DebtRatio,
-        "MonthlyIncome": MonthlyIncome,
-        "NumberOfOpenCreditLinesAndLoans": NumberOfOpenCreditLinesAndLoans,
-        "NumberOfTimes90DaysLate": NumberOfTimes90DaysLate,
-        "NumberRealEstateLoansOrLines": NumberRealEstateLoansOrLines,
-        "NumberOfTime60_89DaysPastDueNotWorse": NumberOfTime60_89DaysPastDueNotWorse,
-        "NumberOfDependents": NumberOfDependents,
-    }
+    features = InputFeatures(
+        RevolvingUtilizationOfUnsecuredLines=RevolvingUtilizationOfUnsecuredLines,
+        age=age,
+        NumberOfTime30_59DaysPastDueNotWorse=NumberOfTime30_59DaysPastDueNotWorse,
+        DebtRatio=DebtRatio,
+        MonthlyIncome=MonthlyIncome,
+        NumberOfOpenCreditLinesAndLoans=NumberOfOpenCreditLinesAndLoans,
+        NumberOfTimes90DaysLate=NumberOfTimes90DaysLate,
+        NumberRealEstateLoansOrLines=NumberRealEstateLoansOrLines,
+        NumberOfTime60_89DaysPastDueNotWorse=NumberOfTime60_89DaysPastDueNotWorse,
+        NumberOfDependents=NumberOfDependents,
+    )
 
-    # Send the data to FastAPI endpoint for prediction
-    response = requests.post("http://127.0.0.1:8000/predict", json=data)
-
-    # Parse the response from FastAPI and return it
-    prediction = response.json()["prediction"]
+    prediction = make_prediction(features)
     return prediction
 
 
