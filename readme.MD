@@ -63,7 +63,7 @@ We use the "Give Me Some Credit" dataset from Kaggle, which contains anonymized 
 ### 📦 Install
 
 ```bash
-git clone https://github.com/your-username/credit-default-mlops.git
+git clone https://github.com/mateocontrerass/credit-default-mlops.git
 cd credit-default-mlops
 make install  # Or use `pip install -r requirements.txt`
 ```

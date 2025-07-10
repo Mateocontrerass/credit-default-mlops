@@ -50,3 +50,4 @@ deploy:
 		--allow-unauthenticated \
 		--port 8000 \
 		--project credit-default-mlops
+
