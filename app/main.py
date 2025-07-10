@@ -16,7 +16,7 @@ from google.cloud import bigquery
 
 bq_client = bigquery.Client()
 dataset_id = "credit_model_logs"
-table_id = "prediction_logs"
+table_id = "predictions"
 
 # === FASTAPI APP ===
 app = FastAPI(title="Credit Default Prediction API")
