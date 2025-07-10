@@ -1,16 +1,33 @@
+install:
+	@if [ "$$VIRTUAL_ENV" = "" ]; then \
+		echo "❌ Virtual environment not activated. Please create a virtual environment"; \
+		exit 1; \
+	fi
+	@echo " Installing Python dependencies..."
+	pip install --upgrade pip
+	pip install -r requirements.txt
+
+	@echo " Installing development dependencies..."
+	pip install -r requirements-dev.txt
+
+	@echo " Installing pre-commit hooks..."
+	pre-commit install
+
+	@echo "✅ Environment is ready!"
+
 
 # Lint the code using black
 lint:
-	black app test
+	black app test src
 
 # Run all tests
 test:
 	pytest -v --disable-warnings
 
-# Run API container
+# Run API container locally
 run-api:
 	docker build -t credit-api -f Dockerfile .
-	docker run -p 8000:8000 -p 7860:7860 credit-api
+	docker run -p 8000:8000  credit-api
 
 # Clean up .pyc and __pycache__
 clean:
