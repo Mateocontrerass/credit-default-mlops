@@ -1,5 +1,5 @@
 # Credit Default Prediction API - An end to end MLOps Project
-### Project set up on the 9th of July 2025, API up until 30th of July 2025.
+###  Project started: July 9, 2025 · API live until: July 30, 2025
 Credit default occurs when a borrower fails to repay a loan according to the agreed terms. For banks and financial institutions, accurately identifying customers who are at high risk of default is critical to minimizing financial losses and maintaining portfolio health.
 
 This project addresses the problem by developing a machine learning system that predicts the likelihood of a customer defaulting on their credit obligations. The goal is to automate risk assessment and support decision-making for loan approvals and credit limit assignments.
