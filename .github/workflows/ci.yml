@@ -41,7 +41,7 @@ jobs:
         run: docker build -t credit-predict-api -f Dockerfile .
 
       - name: Run Docker container
-        run: docker run -d -p 8000:8000 --name credit-api credit-predict-api
+        run: docker run -d -p 8000:8000 -e ENV=local --name credit-api credit-predict-api
         
       - name: Wait for FastAPI to be ready
         run: |
