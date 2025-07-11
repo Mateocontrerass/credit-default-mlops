@@ -42,9 +42,17 @@ jobs:
 
       - name: Run Docker container
         run: docker run -d -p 8000:8000 --name credit-api credit-predict-api
-
-      - name: Wait for container to be ready
-        run: sleep 5
+        
+      - name: Wait for FastAPI to be ready
+        run: |
+          for i in {1..10}; do
+            echo "Checking if API is up (attempt $i)..."
+            if curl -s http://localhost:8000/health | grep -q "ok"; then
+              echo "✅ API is up!"
+              break
+            fi
+            sleep 3
+          done
 
       - name: Run all tests
         run: pytest
